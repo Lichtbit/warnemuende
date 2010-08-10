@@ -1,4 +1,5 @@
 <?php
+namespace warnemuende\model;
 /**
  * Interface for preparing databases
  *
