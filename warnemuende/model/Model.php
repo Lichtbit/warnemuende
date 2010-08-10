@@ -6,7 +6,7 @@ require_once 'Initialization.php';
  *
  * @author Sebastian Gaul <sebastian@mgvmedia.com>
  */
-class Model implements Initialization {
+class Model {
 
     /**
      * Database table name for this model
@@ -20,10 +20,10 @@ class Model implements Initialization {
      *
      * @var string
      */
-    protected static $storageEngine;
+    protected static $storageEngine = "mysql";
 
     /**
-     * @see Initialization#initDatabase()
+     * Prepares database tables
      */
     public static function initDatabase() {
         // TODO

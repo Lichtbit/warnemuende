@@ -8,8 +8,25 @@ namespace warnemuende\model;
 interface Initialization {
 
     /**
-     * Prepares database tables
+     * Sets table name for current Model
+     *
+     * @param string table name
      */
-    public static function initDatabase();
+    public function setTableName($name);
+
+    /**
+     * Sets a field and options
+     *
+     * @param string $name field name
+     * @param mixed[] $options
+     */
+    public function setField($name, $options);
+
+    /**
+     * Adds table to database
+     */
+    public function init();
+
+
 }
 ?>
