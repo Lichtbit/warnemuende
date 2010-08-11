@@ -7,10 +7,12 @@ namespace warnemuende\model;
  */
 class MySqlInitialization implements Initialization {
     //put your code here
-    public function init(){
+    public function init() {
     }
+
     public function setField($name, $options) {
     }
+
     public function setTableName($name) {
     }
 }
