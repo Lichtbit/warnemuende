@@ -22,6 +22,25 @@ class Model {
      */
     protected static $storageEngine = "mysql";
 
+    public static function getFields() {
+        $ar = array();
+        foreach (get_class_vars(get_called_class()) as $name => $prop) {
+            $ar[] = $name;
+        }
+        return $ar;
+    }
+
+    public static function getFieldOption($fieldName, $option) {
+        if (isset(static::$$fieldName)) {
+            // PHP seems to have problems with directly accessing this array
+            $a = static::$$fieldName;
+            if (isset($a[$option])) {
+                return $a[$option];
+            }
+        }
+        return null;
+    }
+
     /**
      * Prepares database tables
      */
