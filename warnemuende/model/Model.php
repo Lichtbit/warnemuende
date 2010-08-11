@@ -41,11 +41,24 @@ class Model {
         return null;
     }
 
+    public static function getTableName() {
+        if (isset(static::$tableName)) {
+            return static::$tableName;
+        } else {
+            return strtolower(substr(get_called_class(), 0, 1)).substr(get_called_class(), 1)."s";
+        }
+    }
+
     /**
      * Prepares database tables
      */
     public static function initDatabase() {
-        // TODO
+        $m = new MySqlInitialization();
+        foreach (this::getFields() as $field) {
+            $m->setField($field, static::$$field);
+        }
+        $m->setTableName(self::getTableName());
+        $m->init();
     }
 }
 ?>
