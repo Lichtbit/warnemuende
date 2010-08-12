@@ -48,11 +48,11 @@ class Page extends Model {
         "type" => "association",
         "class" => "Page",
         "cardinality" => "n"
-    );
+    );*/
 
     public static $Indices = array(
         "slug"
-    );*/
+    );
 
 
 }

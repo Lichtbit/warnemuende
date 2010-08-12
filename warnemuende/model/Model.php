@@ -13,14 +13,14 @@ class Model {
      *
      * @var string
      */
-    protected static $tableName;
+    protected static $TableName;
 
     /**
      * Determines which database is used
      *
      * @var string
      */
-    protected static $storageEngine = "mysql";
+    protected static $StorageEngine = "mysql";
 
     public static function getFields() {
         $ar = array();
@@ -42,8 +42,8 @@ class Model {
     }
 
     public static function getTableName() {
-        if (isset(static::$tableName)) {
-            return static::$tableName;
+        if (isset(static::$TableName)) {
+            return static::$TableName;
         } else {
             return strtolower(substr(get_called_class(), 0, 1)).substr(get_called_class(), 1)."s";
         }
@@ -55,7 +55,7 @@ class Model {
     public static function initDatabase() {
         $m = new MySqlInitialization();
         foreach (self::getFields() as $field) {
-            if ($field == "tableName" OR $field == "storageEngine") {
+            if (strcmp($field, ucfirst($field)) == 0) {
                 continue;
             }
             $m->setField($field, static::$$field);
