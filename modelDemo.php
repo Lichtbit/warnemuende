@@ -4,7 +4,12 @@ error_reporting(E_ALL);
 
 // Load all classes from namespace-like directories
 function __autoload($className) {
-    require_once str_replace('\\', '/', $className).".php";
+    if (is_file(str_replace('\\', '/', $className).".php")) {
+        require_once str_replace('\\', '/', $className).".php";
+        return true;
+    } else {
+        return false;
+    }
 }
 
 use warnemuende\model\Model;
@@ -43,11 +48,11 @@ class Page extends Model {
         "type" => "association",
         "class" => "Page",
         "cardinality" => "n"
-    );*/
+    );
 
     public static $Indices = array(
         "slug"
-    );
+    );*/
 
 
 }
@@ -58,6 +63,11 @@ echo "\n";
 
 echo "getFieldOption('id', 'type'): ";
 echo Page::getFieldOption("id", "type");
+echo "\n\n";
+
+echo "initDatabase(): ";
+echo Page::initDatabase();
+echo "\n";
 
 echo "\n\n Reached end";
 ?>

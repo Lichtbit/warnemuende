@@ -54,7 +54,10 @@ class Model {
      */
     public static function initDatabase() {
         $m = new MySqlInitialization();
-        foreach (this::getFields() as $field) {
+        foreach (self::getFields() as $field) {
+            if ($field == "tableName" OR $field == "storageEngine") {
+                continue;
+            }
             $m->setField($field, static::$$field);
         }
         $m->setTableName(self::getTableName());
