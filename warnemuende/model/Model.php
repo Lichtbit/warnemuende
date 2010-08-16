@@ -41,6 +41,16 @@ class Model {
         return null;
     }
 
+    public static function getIndices() {
+        $ar = array();
+        if (isset(static::$Indices) && count(static::$Indices) > 0) {
+            foreach (static::$Indices as $name => $indices) {
+                $ar[$name] = $indices;
+            }
+        }
+        return $ar;
+    }
+
     public static function getTableName() {
         if (isset(static::$TableName)) {
             return static::$TableName;
@@ -59,6 +69,9 @@ class Model {
                 continue;
             }
             $m->setField($field, static::$$field);
+        }
+        foreach (self::getIndices() as $indices) {
+            $m->addIndex($indices);
         }
         $m->setTableName(self::getTableName());
         $m->init();

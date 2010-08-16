@@ -14,6 +14,8 @@ class MySqlInitialization implements Initialization {
      */
     private $fields;
 
+    private $indices;
+
     /**
      * Relation's name
      *
@@ -23,6 +25,7 @@ class MySqlInitialization implements Initialization {
     
     public function  __construct() {
         $this->fields = array();
+        $this->indices = array();
     }
 
     public function init() {
@@ -38,6 +41,14 @@ class MySqlInitialization implements Initialization {
         $this->tableName = $name;
     }
 
+    public function getIndices() {
+        return $this->indices;
+    }
+
+    public function addIndex(array $fields) {
+        $this->indices[] = $fields;
+    }
+
     public function getCreateTableStatement() {
         $q  = "CREATE TABLE `".$this->tableName."` (\n";
         foreach ($this->fields as $name => $prop) {
@@ -51,6 +62,8 @@ class MySqlInitialization implements Initialization {
                 case "integer":
                     isset($prop["maximumLength"]) ? $l = $prop["maximumLength"] : $l = 11;
                     $q .= "`".$name."` INTEGER(".$l.")".(isset($prop["unsigned"]) ? " UNSIGNED" : "");
+                    $q .= " NOT NULL". (isset($prop["autoIncrement"]) ? " AUTO_INCREMENT" : "");
+                    $q .= (isset($prop["primaryKey"]) ? " PRIMARY KEY" : "");
                     break;
                 case "text":
                     if (isset($prop["maximumLength"])) {
@@ -85,9 +98,15 @@ class MySqlInitialization implements Initialization {
             }
             $q .= ",\n";
         }
+        // Add indices
+        foreach ($this->indices as $is) {
+            $q .= "INDEX (";
+            $q .= "`".implode("`, `", $is)."`";
+            $q .= "),\n";
+        }
         $q = substr($q, 0, -2);
-        $q .= "\n);";
-        return $q;
+        $q .= "\n)";
+        return $q.";";
     }
 }
 ?>

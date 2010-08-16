@@ -51,7 +51,7 @@ class Page extends Model {
     );*/
 
     public static $Indices = array(
-        "slug"
+        array("slug")
     );
 
 
