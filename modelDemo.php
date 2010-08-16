@@ -44,14 +44,32 @@ class Page extends Model {
         "semantic" => "page content"
     );
 
-    /*public static $tags = array(
+    public static $tags = array(
         "type" => "association",
         "class" => "Page",
         "cardinality" => "n"
-    );*/
+    );
 
     public static $Indices = array(
         array("slug")
+    );
+
+
+}
+
+class PageTag extends Model {
+
+    public static $tag = array(
+        "type" => "text",
+        "maximumLength" => 30,
+        "primaryKey" => true
+    );
+
+    public static $page = array(
+        "type" => "association",
+        "class" => "Page",
+        "cardinality" => 1,
+        "primaryKey" => true
     );
 
 
@@ -65,8 +83,12 @@ echo "getFieldOption('id', 'type'): ";
 echo Page::getFieldOption("id", "type");
 echo "\n\n";
 
-echo "initDatabase(): ";
+echo "Page::initDatabase(): ";
 echo Page::initDatabase();
+echo "\n\n";
+
+echo "PageTag::initDatabase(): ";
+echo PageTag::initDatabase();
 echo "\n";
 
 echo "\n\n Reached end";

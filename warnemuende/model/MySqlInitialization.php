@@ -85,7 +85,7 @@ class MySqlInitialization implements Initialization {
                     // If relation is m:n the m will add the connection table:
                     } elseif(isset($prop["cardinality"])
                              && $prop["cardinality"] == "m") {
-                        // TODO
+                        // TODO Create another table to realize n:m association
                     } else {
                         continue(2);
                     }
