@@ -29,8 +29,7 @@ class MySqlInitialization implements Initialization {
     }
 
     public function init() {
-        // TODO
-        echo $this->getCreateTableStatement();
+        mysql_query($this->getCreateTableStatement());
     }
 
     public function setField($name, $options) {

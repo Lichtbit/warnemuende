@@ -83,13 +83,24 @@ echo "getFieldOption('id', 'type'): ";
 echo Page::getFieldOption("id", "type");
 echo "\n\n";
 
-echo "Page::initDatabase(): ";
+mysql_connect("localhost", "modeltester", "test");
+mysql_select_db("modeltester");
+$result = mysql_query("show tables;");
+if (mysql_num_rows($result) != 0) {
+    die("Testing can lead to different problems - please give me an empty database.");
+}
+
+echo "Page::initDatabase()... ";
 echo Page::initDatabase();
 echo "\n\n";
 
-echo "PageTag::initDatabase(): ";
+echo "PageTag::initDatabase()... ";
 echo PageTag::initDatabase();
 echo "\n";
 
-echo "\n\n Reached end";
+
+echo "\n\nDeleting created databases...";
+@mysql_query("drop table ".Page::getTableName());
+@mysql_query("drop table ".PageTag::getTableName());
+echo "\n Reached end";
 ?>
