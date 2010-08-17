@@ -1,5 +1,6 @@
 <?php
 namespace warnemuende\model;
+require_once "Initialization.php";
 /**
  * Prepares MySQL databases for a specific Model
  *

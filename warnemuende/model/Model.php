@@ -55,7 +55,8 @@ class Model {
         if (isset(static::$TableName)) {
             return static::$TableName;
         } else {
-            return strtolower(substr(get_called_class(), 0, 1)).substr(get_called_class(), 1)."s";
+            $name = substr(strrchr(get_called_class(),"\\"),1);
+            return strtolower(substr($name, 0, 1)).substr($name, 1)."s";
         }
     }
 
