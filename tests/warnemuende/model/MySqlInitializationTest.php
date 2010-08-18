@@ -25,6 +25,7 @@ class MySqlInitializationTest extends \PHPUnit_Framework_TestCase {
     protected function setUp() {
         mysql_connect("localhost", "modeltester", "test");
         mysql_select_db("modeltester");
+        $this->object = new MySqlInitialization();
     }
 
     /**
@@ -34,69 +35,30 @@ class MySqlInitializationTest extends \PHPUnit_Framework_TestCase {
     protected function tearDown() {
     }
 
-    /**
-     * @todo Implement testInit().
-     */
     public function testInit() {
         $result = mysql_query("show tables;");
         if (mysql_num_rows($result) == 0) {
             Page::initDatabase();
             $result = mysql_query("show tables like '".Page::getTableName()."'");
-            $this->assertEquals(mysql_num_rows($result), 1);
-            @mysql_query("drop table ".Page::getTableName());
+            $number = mysql_num_rows($result);
+            $this->assertEquals($number, 1);
         } else {
-            $this->fail("Testing can lead to different problems - please give me an empty database.");
+            $this->fail("Need an empty database for security reasons.");
         }
     }
 
-    /**
-     * @todo Implement testSetField().
-     */
-    public function testSetField() {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
+    public function testDropTable() {
+        $result = mysql_query("show tables like '".Page::getTableName()."'");
+        if (mysql_num_rows($result) == 1) {
+            $this->object->setTableName(Page::getTableName());
+            $this->object->dropTable();
+            $result = mysql_query("show tables like '".Page::getTableName()."'");
+            $this->assertEquals(mysql_num_rows($result), 0);
+        } else {
+            $this->fail("Unable to test table dropping.");
+        }
     }
 
-    /**
-     * @todo Implement testSetTableName().
-     */
-    public function testSetTableName() {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
-    }
 
-    /**
-     * @todo Implement testGetIndices().
-     */
-    public function testGetIndices() {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
-    }
-
-    /**
-     * @todo Implement testAddIndex().
-     */
-    public function testAddIndex() {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
-    }
-
-    /**
-     * @todo Implement testGetCreateTableStatement().
-     */
-    public function testGetCreateTableStatement() {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
-    }
 }
 ?>

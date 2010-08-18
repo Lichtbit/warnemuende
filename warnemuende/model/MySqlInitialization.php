@@ -108,5 +108,11 @@ class MySqlInitialization implements Initialization {
         $q .= "\n)";
         return $q.";";
     }
+
+    public function dropTable() {
+        if (isset($this->tableName)) {
+            mysql_query("DROP TABlE `".$this->tableName."`");
+        }
+    }
 }
 ?>
