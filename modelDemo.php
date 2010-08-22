@@ -12,7 +12,18 @@ function __autoload($className) {
     }
 }
 
-use warnemuende\model\Model;
+use warnemuende\model\mysql\Model;
+
+class Page extends Model {
+
+}
+
+$p = new Page();
+$p->addInteger("id", 22, true, false, true, array("typei" => "apfel"));
+
+echo $p->getCreateTableStatement();
+
+die("Läuft");
 /* 
  * This is a demo page for testing models
  */

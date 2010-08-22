@@ -1,28 +1,18 @@
 <?php
-namespace warnemuende\model;
-require_once "Initialization.php";
+namespace warnemuende\model\mysql;
+
+/* FIXME Whats the problem with that:
+require_once '../AbstractModel.php';
+   Autoload will fix this for now... */
+
 /**
  * Prepares MySQL databases for a specific Model
  *
  * @author Sebastian Gaul <sebastian@mgvmedia.com>
  */
-class MySqlInitialization implements Initialization {
-    
-    /**
-     * Array of name => option[]
-     *
-     * @var mixed[]
-     */
-    private $fields;
+abstract class MySqlInitialization extends \warnemuende\model\AbstractModel {
 
     private $indices;
-
-    /**
-     * Relation's name
-     *
-     * @var string
-     */
-    private $tableName;
     
     public function  __construct() {
         $this->fields = array();
@@ -50,7 +40,7 @@ class MySqlInitialization implements Initialization {
     }
 
     public function getCreateTableStatement() {
-        $q  = "CREATE TABLE `".$this->tableName."` (\n";
+        $q  = "CREATE TABLE `".$this->getTableName()."` (\n";
         foreach ($this->fields as $name => $prop) {
             if (!isset($prop["type"])) {
                 trigger_error("No type given for <em>".
