@@ -17,19 +17,12 @@ abstract class MySqlStorage extends MySqlInitialization {
      */
     protected $storage;
 
-    /**
-     * Database's relation name
-     *
-     * @var string name
-     */
-    protected $tableName;
-
     public function delete() {
     }
 
     public function save() {
-        $q = "REPLACE `".$this->tableName."` SET\n";
-        foreach ($storage as $name => $value) {
+        $q = "REPLACE `".$this->getTableName()."` SET\n";
+        foreach ($this->storage as $name => $value) {
             if (isset($this->storage[$name])) {
                 if (is_string($value)) {
                     $q .= "`".$name."` = ";
@@ -56,7 +49,7 @@ abstract class MySqlStorage extends MySqlInitialization {
             }
         }
         $q = substr($q, 0, -2)."\n;";
-
+        echo $q;
         mysql_query($q);
     }
 
@@ -78,8 +71,6 @@ abstract class MySqlStorage extends MySqlInitialization {
     public function setTableName($name) {
         $this->tableName = $name;
     }
-
-
     
 }
 ?>

@@ -14,14 +14,28 @@ function __autoload($className) {
 
 use warnemuende\model\mysql\Model;
 
+mysql_connect("localhost", "modeltester", "test");
+mysql_select_db("modeltester");
+mysql_query("SET NAMES 'utf8';");
+mysql_query("SET CHARACTER NAMES 'utf8';");
+
 class Page extends Model {
 
+    public function configure() {
+        $this->addInteger("id", 22, true, false, true, array("myType" => "apfel"));
+        $this->addText("slug", 30);
+        $this->addText("content", -1);
+
+        $this->addIndex(array("slug"));
+    }
 }
 
 $p = new Page();
-$p->addInteger("id", 22, true, false, true, array("typei" => "apfel"));
+$p->createTables();
 
-echo $p->getCreateTableStatement();
+$p->setField("slug", "home");
+$p->setField("content", "Hallo und herzlich willkomennßäüö");
+$p->save();
 
 die("Läuft");
 /* 
