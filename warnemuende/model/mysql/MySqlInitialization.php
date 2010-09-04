@@ -13,18 +13,22 @@ require_once '../AbstractModel.php';
 abstract class MySqlInitialization extends \warnemuende\model\AbstractModel {
 
     private $indices;
+
+    /*
+     * MySQL datatype lengths
+     */
+    const TINY_TEXT = 255;
+    const TEXT = 65536;
+    const MEDIUM_TEXT = 16777216;
+    const LONG_TEXT = 4294967296;
     
     public function  __construct() {
-        $this->fields = array();
+        parent::__construct();
         $this->indices = array();
     }
 
-    public function init() {
+    public function createTables() {
         mysql_query($this->getCreateTableStatement());
-    }
-
-    public function setField($name, $options) {
-        $this->fields[$name] = $options;
     }
 
     public function setTableName($name) {
@@ -56,14 +60,17 @@ abstract class MySqlInitialization extends \warnemuende\model\AbstractModel {
                     $q .= (isset($prop["primaryKey"]) ? " PRIMARY KEY" : "");
                     break;
                 case "text":
-                    if (isset($prop["maximumLength"])) {
-                        $q .= "`".$name."` VARCHAR(".$prop["maximumLength"].")";
-                    } else {
+                    if ($prop["maximumLength"] < 0) {
+                        $q .= "`".$name."` LONGTEXT";
+                    } elseif ($prop["maximumLength"] <= 100) {
+                        $q .= "`".$name."` CHAR(".$prop["maximumLength"].")";
+                    } elseif ($prop["maximumLength"] <= self::TINY_TEXT) {
                         $q .= "`".$name."` TINYTEXT";
+                    } elseif ($prop["maximumLength"] <= self::TEXT) {
+                        $q .= "`".$name."` TEXT";
+                    } elseif ($prop["maximumLength"] <= self::MEDIUM_TEXT) {
+                        $q .= "`".$name."` MEDIUMTEXT";
                     }
-                    break;
-                case "longtext":
-                    $q .= "`".$name."` LONGTEXT";
                     break;
                 case "association":
                     if (isset($prop["cardinality"])
@@ -88,6 +95,7 @@ abstract class MySqlInitialization extends \warnemuende\model\AbstractModel {
             }
             $q .= ",\n";
         }
+        // FIXME Doesnt work yet
         // Add indices
         foreach ($this->indices as $is) {
             $q .= "INDEX (";
@@ -95,7 +103,7 @@ abstract class MySqlInitialization extends \warnemuende\model\AbstractModel {
             $q .= "),\n";
         }
         $q = substr($q, 0, -2);
-        $q .= "\n)";
+        $q .= "\n) CHARACTER SET 'utf8'";
         return $q.";";
     }
 

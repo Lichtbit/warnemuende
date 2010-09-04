@@ -8,5 +8,5 @@ require_once "MySqlSelection.php";
  *
  * @author Sebastian Gaul <sebastian@mgvmedia.com>
  */
-class Model extends MySqlSelection { }
+abstract class Model extends MySqlSelection { }
 ?>

@@ -22,6 +22,15 @@ abstract class AbstractModel  {
      */
     protected $fields;
 
+    public function  __construct() {
+        $this->configure();
+    }
+
+    /**
+     * Configures Model
+     */
+    abstract public function configure();
+
     /**
      * The name of the relation used in databases
      *
@@ -81,6 +90,16 @@ abstract class AbstractModel  {
             "unsigned"      => $unsigned,
             "autoIncrement" => $autoIncrement,
             "primaryKey"    => $primaryKey
+        );
+        $this->addGenericField($name, $config, $options);
+    }
+
+    public function addText($name,
+                            $maximumLength,
+                            array $options = array()) {
+        $config = array(
+            "type"          => "text",
+            "maximumLength" => $maximumLength,
         );
         $this->addGenericField($name, $config, $options);
     }
