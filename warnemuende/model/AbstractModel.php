@@ -104,6 +104,17 @@ abstract class AbstractModel  {
         $this->addGenericField($name, $config, $options);
     }
 
+    public function addAssociation($name,
+                                   $class,
+                                   $cardinality) {
+        $config = array(
+            "type"          => "association",
+            "class"         => $class,
+            "cardinality"   => $cardinality
+        );
+        $this->addGenericField($name, $config, $options);
+    }
+
     /**
      * Returns an array of all registered fields for the model
      *

@@ -30,13 +30,27 @@ class Page extends Model {
     }
 }
 
+class PageTag extends Model {
+
+    public function configure() {
+        $this->addInteger("id", 22, true, true, true);
+        $this->addText("tag", 30);
+        $this->addInteger("level", 10);
+    }
+}
+
 $p = new Page();
 $p->createTables();
+
+$t = new PageTag();
+$t->createTables();
 
 $p->setField("slug", "home");
 $p->setField("content", "Hallo und herzlich willkomennßäüö");
 $p->save();
 
+$p->dropTable();
+$t->dropTable();
 die("Läuft");
 /* 
  * This is a demo page for testing models
