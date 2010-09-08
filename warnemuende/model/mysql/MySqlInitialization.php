@@ -28,6 +28,10 @@ abstract class MySqlInitialization extends \warnemuende\model\AbstractModel {
     }
 
     public function createTables() {
+        if ($this->tableExists($this->getTableName())) {
+            trigger_error("There is already a table named ".$this->getTableName()." - creation cancelled");
+            return;
+        }
         mysql_query($this->getCreateTableStatement());
     }
 
@@ -54,16 +58,28 @@ abstract class MySqlInitialization extends \warnemuende\model\AbstractModel {
             }
             switch ($prop["type"]) {
                 case "integer":
-                    isset($prop["maximumLength"]) ? $l = $prop["maximumLength"] : $l = 11;
-                    $q .= "`".$name."` INTEGER(".$l.")".(isset($prop["unsigned"]) ? " UNSIGNED" : "");
-                    $q .= " NOT NULL". (isset($prop["autoIncrement"]) ? " AUTO_INCREMENT" : "");
-                    $q .= (isset($prop["primaryKey"]) ? " PRIMARY KEY" : "");
+                    if (isset($prop["maximumLength"]) && $prop["maximumLength"]) {
+                        $l = $prop["maximumLength"];
+                    } else {
+                         $l = 11;
+                    }
+                    $q .= "`".$name."` INTEGER(".$l.")";
+                    if (isset($prop["unsigned"]) && $prop["unsigned"]) {
+                        $q .= " UNSIGNED";
+                    }
+                    $q .= " NOT NULL";
+                    if (isset($prop["autoIncrement"]) && $prop["autoIncrement"]) {
+                        $q .= " AUTO_INCREMENT";
+                    }
+                    if (isset($prop["primaryKey"]) && $prop["primaryKey"]) {
+                        $q .= " PRIMARY KEY";
+                    }
                     break;
                 case "text":
                     if ($prop["maximumLength"] < 0) {
                         $q .= "`".$name."` LONGTEXT";
                     } elseif ($prop["maximumLength"] <= 100) {
-                        $q .= "`".$name."` CHAR(".$prop["maximumLength"].")";
+                        $q .= "`".$name."` VARCHAR(".$prop["maximumLength"].")";
                     } elseif ($prop["maximumLength"] <= self::TINY_TEXT) {
                         $q .= "`".$name."` TINYTEXT";
                     } elseif ($prop["maximumLength"] <= self::TEXT) {
@@ -108,9 +124,19 @@ abstract class MySqlInitialization extends \warnemuende\model\AbstractModel {
     }
 
     public function dropTable() {
-        if (isset($this->tableName)) {
-            mysql_query("DROP TABlE `".$this->tableName."`");
+        if ($this->tableExists($this->getTableName())) {
+            mysql_query("DROP TABlE `".$this->getTableName()."`;");
+        } else {
+            trigger_error("Unable to find table ".$this->getTableName()." for dropping");
         }
+    }
+
+    public function tableExists($tableName) {
+        $result = mysql_query("SHOW TABLES LIKE '".$tableName."';");
+        if (mysql_num_rows($result) > 0) {
+            return true;
+        }
+        return false;
     }
 }
 ?>
