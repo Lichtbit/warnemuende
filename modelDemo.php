@@ -22,126 +22,45 @@ mysql_query("SET CHARACTER NAMES 'utf8';");
 class Page extends Model {
 
     public function configure() {
-        $this->addIntegerField("id", 22, true, false, array("myType" => "apfel"));
+        $this->addIntegerField("id", 22, true, array("myType" => "apfel"));
         $this->addTextField("slug", 30);
         $this->addTextField("content", -1);
 
-        $this->setPrimaryKey("id", "slug");
-        $this->addIndex("slug", "id");
+        $this->setPrimaryKey("id");
+        $this->addIndex("slug");
     }
 }
 
 class PageTag extends Model {
 
     public function configure() {
-        $this->addIntegerField("id", 22, true, true);
+        $this->addIntegerField("id", 22, true);
         $this->addTextField("tag", 30);
         $this->addIntegerField("level", 10);
+        // FIXME If an integer has option auto increment true it must be a key
+        $this->setPrimaryKey("id");
     }
 }
 
 $p = new Page();
 
-echo $p->getCreateTableStatement()."\n\n";
+//$p->createTables();
+echo $p->getCreateTableStatement();
 
 $t = new PageTag();
-$t->createTables();
+//$t->createTables();
+echo $t->getCreateTableStatement();
 
 $p->setField("slug", "home");
 $p->setField("content", "Hallo und herzlich willkomennßäüö");
 $p->save();
 
+$t->setField("tag", "neuerTag");
+$t->save();
+echo mysql_error();
+
 //$p->dropTable();
 //$t->dropTable();
-die("Läuft");
-/* 
- * This is a demo page for testing models
- */
+die("\n--------------\nLäuft durch");
 
-class Page extends Model {
-
-    public static $id = array(
-        "type" => "integer",
-        "unsigned" => true,
-        "autoIncrement" => true,
-        "primaryKey" => true,
-        "semantic" => "identifier"
-    );
-
-    public static $slug = array(
-        "type" => "text",
-        "maximumLength" => 30,
-        "index" => true,
-        "semantic" => "page slug"
-    );
-
-    public static $title = array(
-        "type" => "text",
-        "semantic" => "page title"
-    );
-
-    public static $content = array(
-        "type" => "longtext",
-        "semantic" => "page content"
-    );
-
-    public static $tags = array(
-        "type" => "association",
-        "class" => "Page",
-        "cardinality" => "n"
-    );
-
-    public static $Indices = array(
-        array("slug")
-    );
-
-
-}
-
-class PageTag extends Model {
-
-    public static $tag = array(
-        "type" => "text",
-        "maximumLength" => 30,
-        "primaryKey" => true
-    );
-
-    public static $page = array(
-        "type" => "association",
-        "class" => "Page",
-        "cardinality" => 1,
-        "primaryKey" => true
-    );
-
-
-}
-
-echo "getFields(): ";
-print_r(Page::getFields());
-echo "\n";
-
-echo "getFieldOption('id', 'type'): ";
-echo Page::getFieldOption("id", "type");
-echo "\n\n";
-
-mysql_connect("localhost", "modeltester", "test");
-mysql_select_db("modeltester");
-$result = mysql_query("show tables;");
-if (mysql_num_rows($result) != 0) {
-    die("Testing can lead to different problems - please give me an empty database.");
-}
-
-echo "Page::initDatabase()... ";
-echo Page::initDatabase();
-echo "\n\n";
-
-echo "PageTag::initDatabase()... ";
-echo PageTag::initDatabase();
-echo "\n";
-
-
-echo "\n\nDeleting created databases...";
-@mysql_query("drop table ".Page::getTableName());
-@mysql_query("drop table ".PageTag::getTableName());
-echo "\n Reached end";
 ?>

@@ -22,30 +22,29 @@ abstract class MySqlStorage extends MySqlInitialization {
 
     public function save() {
         $q = "REPLACE `".$this->getTableName()."` SET\n";
+        print_r($this->storage);
         foreach ($this->storage as $name => $value) {
-            if (isset($this->storage[$name])) {
-                if (is_string($value)) {
-                    $q .= "`".$name."` = ";
-                    $q .= "'".mysql_real_escape_string(htmlspecialchars($value))."'";
-                    $q .= ",\n";
-                } /*elseif(static::getAttribute($name, "type") == "association") {
-                    if (static::getAttribute($name, "cardinality") == "1") {
-                        if ($this->$name->getId() == null) {
-                            trigger_error("Unable to save reference - related ".get_class($this->$name)." object has no id");
-                            continue;
-                        }
-                        $q .= "`".$name."` = ";
-                        // TODO Foreign key can be much more complicated
-                        $q .= $this->$name->getId();
-                        $q .= ",\n";
-                    } else {
-                        trigger_error("Not implemented yet", \E_USER_ERROR);
+            if (is_string($value)) {
+                $q .= "`".$name."` = ";
+                $q .= "'".mysql_real_escape_string(htmlspecialchars($value))."'";
+                $q .= ",\n";
+            } /*elseif(static::getAttribute($name, "type") == "association") {
+                if (static::getAttribute($name, "cardinality") == "1") {
+                    if ($this->$name->getId() == null) {
+                        trigger_error("Unable to save reference - related ".get_class($this->$name)." object has no id");
+                        continue;
                     }
-                }*/ else {
                     $q .= "`".$name."` = ";
-                    $q .= $this->$name;
+                    // TODO Foreign key can be much more complicated
+                    $q .= $this->$name->getId();
                     $q .= ",\n";
+                } else {
+                    trigger_error("Not implemented yet", \E_USER_ERROR);
                 }
+            }*/ else {
+                $q .= "`".$name."` = ";
+                $q .= $this->$name;
+                $q .= ",\n";
             }
         }
         $q = substr($q, 0, -2)."\n;";
