@@ -12,8 +12,6 @@ require_once '../AbstractModel.php';
  */
 abstract class MySqlInitialization extends \warnemuende\model\AbstractModel {
 
-    private $indices;
-
     /*
      * MySQL datatype lengths
      */
@@ -24,7 +22,6 @@ abstract class MySqlInitialization extends \warnemuende\model\AbstractModel {
     
     public function  __construct() {
         parent::__construct();
-        $this->indices = array();
     }
 
     public function createTables() {
@@ -37,14 +34,6 @@ abstract class MySqlInitialization extends \warnemuende\model\AbstractModel {
 
     public function setTableName($name) {
         $this->tableName = $name;
-    }
-
-    public function getIndices() {
-        return $this->indices;
-    }
-
-    public function addIndex(array $fields) {
-        $this->indices[] = $fields;
     }
 
     public function getCreateTableStatement() {
@@ -70,9 +59,6 @@ abstract class MySqlInitialization extends \warnemuende\model\AbstractModel {
                     $q .= " NOT NULL";
                     if (isset($prop["autoIncrement"]) && $prop["autoIncrement"]) {
                         $q .= " AUTO_INCREMENT";
-                    }
-                    if (isset($prop["primaryKey"]) && $prop["primaryKey"]) {
-                        $q .= " PRIMARY KEY";
                     }
                     break;
                 case "text":
@@ -111,16 +97,18 @@ abstract class MySqlInitialization extends \warnemuende\model\AbstractModel {
             }
             $q .= ",\n";
         }
-        // FIXME Doesnt work yet
-        // Add indices
-        foreach ($this->indices as $is) {
+        if ($this->getPrimaryKey() > 0) {
+            $q .= "PRIMARY KEY (`".implode("`, `", $this->getPrimaryKey())."`),\n";
+        }
+        foreach ($this->getIndices() as $is) {
             $q .= "INDEX (";
             $q .= "`".implode("`, `", $is)."`";
             $q .= "),\n";
         }
         $q = substr($q, 0, -2);
         $q .= "\n) CHARACTER SET 'utf8'";
-        return $q.";";
+        $q .= ";";
+        return $q;
     }
 
     public function dropTable() {

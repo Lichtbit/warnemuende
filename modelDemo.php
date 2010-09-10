@@ -22,25 +22,27 @@ mysql_query("SET CHARACTER NAMES 'utf8';");
 class Page extends Model {
 
     public function configure() {
-        $this->addInteger("id", 22, true, false, true, array("myType" => "apfel"));
-        $this->addText("slug", 30);
-        $this->addText("content", -1);
+        $this->addIntegerField("id", 22, true, false, array("myType" => "apfel"));
+        $this->addTextField("slug", 30);
+        $this->addTextField("content", -1);
 
-        $this->addIndex(array("slug"));
+        $this->setPrimaryKey("id", "slug");
+        $this->addIndex("slug", "id");
     }
 }
 
 class PageTag extends Model {
 
     public function configure() {
-        $this->addInteger("id", 22, true, true, true);
-        $this->addText("tag", 30);
-        $this->addInteger("level", 10);
+        $this->addIntegerField("id", 22, true, true);
+        $this->addTextField("tag", 30);
+        $this->addIntegerField("level", 10);
     }
 }
 
 $p = new Page();
-$p->createTables();
+
+echo $p->getCreateTableStatement()."\n\n";
 
 $t = new PageTag();
 $t->createTables();
@@ -49,8 +51,8 @@ $p->setField("slug", "home");
 $p->setField("content", "Hallo und herzlich willkomennßäüö");
 $p->save();
 
-$p->dropTable();
-$t->dropTable();
+//$p->dropTable();
+//$t->dropTable();
 die("Läuft");
 /* 
  * This is a demo page for testing models

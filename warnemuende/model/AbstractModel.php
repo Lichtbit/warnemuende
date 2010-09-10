@@ -22,6 +22,20 @@ abstract class AbstractModel  {
      */
     protected $fields;
 
+    /**
+     * Array of primary key fields
+     *
+     * @var string[]
+     */
+    protected $primaryKey;
+
+    /**
+     * Array of array of indices
+     *
+     * @var string[][]
+     */
+    protected $indices;
+
     public function  __construct() {
         $this->configure();
     }
@@ -75,26 +89,23 @@ abstract class AbstractModel  {
      * @param integer $maximumLength
      * @param boolean $unsigned
      * @param boolean $autoIncrement
-     * @param boolean $primaryKey
      * @param array $options
      */
-    public function addInteger($name,
+    public function addIntegerField($name,
                                $maximumLength,
                                $unsigned = false,
                                $autoIncrement = false,
-                               $primaryKey = false,
                                array $options = array()) {
         $config = array(
             "type"          => "integer",
             "maximumLength" => $maximumLength,
             "unsigned"      => $unsigned,
-            "autoIncrement" => $autoIncrement,
-            "primaryKey"    => $primaryKey
+            "autoIncrement" => $autoIncrement
         );
         $this->addGenericField($name, $config, $options);
     }
 
-    public function addText($name,
+    public function addTextField($name,
                             $maximumLength,
                             array $options = array()) {
         $config = array(
@@ -141,5 +152,38 @@ abstract class AbstractModel  {
         }
         return null;
     }
+
+    public function setPrimaryKey() {
+        $this->setPrimaryKeyArray(func_get_args());
+    }
+
+    protected function setPrimaryKeyArray(array $keys) {
+        foreach ($keys as $key) {
+            $this->primaryKey[] = $key;
+        }
+    }
+
+    public function getPrimaryKey() {
+        if (!isset($this->primaryKey)) {
+            return array();
+        }
+        return $this->primaryKey;
+    }
+
+    public function getIndices() {
+        if (!isset($this->indices)) {
+            return array();
+        }
+        return $this->indices;
+    }
+
+    public function addIndex() {
+        $this->addIndexArray(func_get_args());
+    }
+
+    public function addIndexArray(array $fields) {
+        $this->indices[] = $fields;
+    }
+
 }
 ?>
