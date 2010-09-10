@@ -97,7 +97,7 @@ abstract class MySqlInitialization extends \warnemuende\model\AbstractModel {
             }
             $q .= ",\n";
         }
-        if ($this->getPrimaryKey() > 0) {
+        if (count($this->getPrimaryKey()) > 0) {
             $q .= "PRIMARY KEY (`".implode("`, `", $this->getPrimaryKey())."`),\n";
         }
         foreach ($this->getIndices() as $is) {

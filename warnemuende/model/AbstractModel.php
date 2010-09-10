@@ -88,19 +88,16 @@ abstract class AbstractModel  {
      * @param string $name
      * @param integer $maximumLength
      * @param boolean $unsigned
-     * @param boolean $autoIncrement
      * @param array $options
      */
     public function addIntegerField($name,
                                $maximumLength,
                                $unsigned = false,
-                               $autoIncrement = false,
                                array $options = array()) {
         $config = array(
             "type"          => "integer",
             "maximumLength" => $maximumLength,
-            "unsigned"      => $unsigned,
-            "autoIncrement" => $autoIncrement
+            "unsigned"      => $unsigned
         );
         $this->addGenericField($name, $config, $options);
     }
@@ -160,6 +157,9 @@ abstract class AbstractModel  {
     protected function setPrimaryKeyArray(array $keys) {
         foreach ($keys as $key) {
             $this->primaryKey[] = $key;
+        }
+        if (count($keys) == 1 && isset($this->fields[$key]["type"]) && $this->fields[$key]["type"] == "integer") {
+            $this->fields[$key]["autoIncrement"] = true;
         }
     }
 
