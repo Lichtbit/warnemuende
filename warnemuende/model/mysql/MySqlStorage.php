@@ -22,7 +22,6 @@ abstract class MySqlStorage extends MySqlInitialization {
 
     public function save() {
         $q = "REPLACE `".$this->getTableName()."` SET\n";
-        print_r($this->storage);
         foreach ($this->storage as $name => $value) {
             if (is_string($value)) {
                 $q .= "`".$name."` = ";
@@ -48,7 +47,6 @@ abstract class MySqlStorage extends MySqlInitialization {
             }
         }
         $q = substr($q, 0, -2)."\n;";
-        echo $q;
         mysql_query($q);
     }
 
