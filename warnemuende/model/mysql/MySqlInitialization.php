@@ -45,56 +45,7 @@ abstract class MySqlInitialization extends \warnemuende\model\AbstractModel {
                               \E_USER_ERROR);
                 exit;
             }
-            switch ($prop["type"]) {
-                case "integer":
-                    if (isset($prop["maximumLength"]) && $prop["maximumLength"]) {
-                        $l = $prop["maximumLength"];
-                    } else {
-                         $l = 11;
-                    }
-                    $q .= "`".$name."` INTEGER(".$l.")";
-                    if (isset($prop["unsigned"]) && $prop["unsigned"]) {
-                        $q .= " UNSIGNED";
-                    }
-                    $q .= " NOT NULL";
-                    if (isset($prop["autoIncrement"]) && $prop["autoIncrement"]) {
-                        $q .= " AUTO_INCREMENT";
-                    }
-                    break;
-                case "text":
-                    if ($prop["maximumLength"] < 0) {
-                        $q .= "`".$name."` LONGTEXT";
-                    } elseif ($prop["maximumLength"] <= 100) {
-                        $q .= "`".$name."` VARCHAR(".$prop["maximumLength"].")";
-                    } elseif ($prop["maximumLength"] <= self::TINY_TEXT) {
-                        $q .= "`".$name."` TINYTEXT";
-                    } elseif ($prop["maximumLength"] <= self::TEXT) {
-                        $q .= "`".$name."` TEXT";
-                    } elseif ($prop["maximumLength"] <= self::MEDIUM_TEXT) {
-                        $q .= "`".$name."` MEDIUMTEXT";
-                    }
-                    break;
-                case "association":
-                    if (isset($prop["cardinality"])
-                        && $prop["cardinality"] == "1") {
-                        // TODO Enable more then INT-linking
-                        // Object can have more than one field as primary key
-                        // with all datatypes
-                        $q .= "`".$name."` INTEGER UNSIGNED";
-                    // If relation is m:n the m will add the connection table:
-                    } elseif(isset($prop["cardinality"])
-                             && $prop["cardinality"] == "m") {
-                        // TODO Create another table to realize n:m association
-                    } else {
-                        continue(2);
-                    }
-                    break;
-                default:
-                    trigger_error("Unknown type <em>".$prop["type"].
-                                  "</em> given for <em>".$name."</em> in Model ".
-                                  get_called_class(), \E_USER_ERROR);
-                    exit;
-            }
+            $q .= $this->getFieldSqlStatement($name, $prop);
             $q .= ",\n";
         }
         if (count($this->getPrimaryKey()) > 0) {
@@ -108,6 +59,54 @@ abstract class MySqlInitialization extends \warnemuende\model\AbstractModel {
         $q = substr($q, 0, -2);
         $q .= "\n) CHARACTER SET 'utf8'";
         $q .= ";";
+        return $q;
+    }
+    
+    protected function getFieldSqlStatement($name, $config) {
+        switch ($config["type"]) {
+            case "integer":
+                return $this->getIntegerSqlStatement($name, $config);
+                break;
+            case "text":
+                return $this->getTextSqlStatement($name, $config);
+                break;
+            default:
+                trigger_error("Unknown type <em>".$prop["type"].
+                              "</em> given for <em>".$name."</em> in Model ".
+                              get_called_class(), \E_USER_ERROR);
+                exit;
+        }
+    }
+
+    protected function getIntegerSqlStatement($name, $prop) {
+        if (isset($prop["maximumLength"]) && $prop["maximumLength"]) {
+            $l = $prop["maximumLength"];
+        } else {
+             $l = 11;
+        }
+        $q = "`".$name."` INTEGER(".$l.")";
+        if (isset($prop["unsigned"]) && $prop["unsigned"]) {
+            $q .= " UNSIGNED";
+        }
+        $q .= " NOT NULL";
+        if (isset($prop["autoIncrement"]) && $prop["autoIncrement"]) {
+            $q .= " AUTO_INCREMENT";
+        }
+        return $q;
+    }
+
+    protected function getTextSqlStatement($name, $prop) {
+        if ($prop["maximumLength"] < 0) {
+            $q = "`".$name."` LONGTEXT";
+        } elseif ($prop["maximumLength"] <= 100) {
+            $q = "`".$name."` VARCHAR(".$prop["maximumLength"].")";
+        } elseif ($prop["maximumLength"] <= self::TINY_TEXT) {
+            $q = "`".$name."` TINYTEXT";
+        } elseif ($prop["maximumLength"] <= self::TEXT) {
+            $q = "`".$name."` TEXT";
+        } elseif ($prop["maximumLength"] <= self::MEDIUM_TEXT) {
+            $q = "`".$name."` MEDIUMTEXT";
+        }
         return $q;
     }
 
