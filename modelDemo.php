@@ -35,21 +35,22 @@ class Page extends Model {
 class Tag extends Model {
 
     public function configure() {
-        $this->addIntegerField("id", 22, true);
+        //$this->addIntegerField("id", 22, true);
         $this->addTextField("tag", 30);
         $this->addIntegerField("level", 10);
         // FIXME If an integer has option auto increment true it must be a key
-        $this->setPrimaryKey("id");
+        $this->setPrimaryKey("tag", "level");
     }
 }
 
 $p = new Page();
 
-//$p->createTables();
+$p->createTables();
+echo mysql_error();
 echo $p->getCreateTableStatement()."\n\n";
 
 $t = new Tag();
-//$t->createTables();
+$t->createTables();
 echo $t->getCreateTableStatement();
 
 $p->setField("slug", "home");

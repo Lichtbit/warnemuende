@@ -29,7 +29,10 @@ abstract class MySqlInitialization extends \warnemuende\model\AbstractModel {
             trigger_error("There is already a table named ".$this->getTableName()." - creation cancelled");
             return;
         }
-        mysql_query($this->getCreateTableStatement());
+        $qs = explode(";\n", $this->getCreateTableStatement());
+        foreach ($qs as $query) {
+            mysql_query($query);
+        }
     }
 
     public function setTableName($name) {
