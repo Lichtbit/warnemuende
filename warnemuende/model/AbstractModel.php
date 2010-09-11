@@ -74,6 +74,9 @@ abstract class AbstractModel  {
 
     protected function addGenericField($name, $config, $options) {
         $this->fields[$name] = $config;
+        if (!is_array($options)) {
+            $options = array();
+        }
         foreach ($options as $oname => $option) {
             if (array_key_exists($oname, $this->fields[$name])) {
                 trigger_error("Using an unallowed option name for field ".$name, \E_USER_ERROR);
@@ -114,11 +117,10 @@ abstract class AbstractModel  {
 
     public function addAssociation($name,
                                    $class,
-                                   $cardinality) {
+                                   array $options = array()) {
         $config = array(
             "type"          => "association",
-            "class"         => $class,
-            "cardinality"   => $cardinality
+            "class"         => $class
         );
         $this->addGenericField($name, $config, $options);
     }
@@ -148,6 +150,14 @@ abstract class AbstractModel  {
             return $this->fields[$fieldName][$optionName];
         }
         return null;
+    }
+
+    public function getFieldOptions($fieldName) {
+        if (isset($this->fields[$fieldName])) {
+            return $this->fields[$fieldName];
+        } else {
+            return null;
+        }
     }
 
     public function setPrimaryKey() {

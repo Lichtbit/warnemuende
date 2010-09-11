@@ -25,13 +25,14 @@ class Page extends Model {
         $this->addIntegerField("id", 22, true, array("myType" => "apfel"));
         $this->addTextField("slug", 30);
         $this->addTextField("content", -1);
+        $this->addAssociation("tag", "Tag");
 
         $this->setPrimaryKey("id");
         $this->addIndex("slug");
     }
 }
 
-class PageTag extends Model {
+class Tag extends Model {
 
     public function configure() {
         $this->addIntegerField("id", 22, true);
@@ -47,7 +48,7 @@ $p = new Page();
 //$p->createTables();
 echo $p->getCreateTableStatement();
 
-$t = new PageTag();
+$t = new Tag();
 //$t->createTables();
 echo $t->getCreateTableStatement();
 

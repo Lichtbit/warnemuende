@@ -45,7 +45,20 @@ abstract class MySqlInitialization extends \warnemuende\model\AbstractModel {
                               \E_USER_ERROR);
                 exit;
             }
-            $q .= $this->getFieldSqlStatement($name, $prop);
+            if ($prop["type"] == "association") {
+                // A simple association can be a inserted in the same table
+                /* @var $c AbstractModel */
+                $c = new $prop["class"];
+                if (count($c->getPrimaryKey()) < 1) {
+                    trigger_error("Association targets need primary keys", \E_USER_ERROR);
+                }
+                foreach ($c->getPrimaryKey() as $key) {
+                    $q .= $c->getFieldSqlStatement($c->getTableName()."_".$key, $c->getFieldOptions($key), true).",\n";
+                }
+                $q = substr($q, 0, -2);
+            } else {
+                $q .= $this->getFieldSqlStatement($name, $prop);
+            }
             $q .= ",\n";
         }
         if (count($this->getPrimaryKey()) > 0) {
@@ -61,24 +74,35 @@ abstract class MySqlInitialization extends \warnemuende\model\AbstractModel {
         $q .= ";";
         return $q;
     }
-    
-    protected function getFieldSqlStatement($name, $config) {
+
+    /**
+     * Creates a line for a SQL creation statement
+     *
+     * Simply uses a name and the common config array. If the field is a foreign
+     * key, i.e. must not contain auto increment and these things, set foreign
+     * key parameter to true.
+     *
+     * @param string $name
+     * @param mixed[] $config
+     * @param boolean $foreignKey
+     * @return string SQL statement part
+     */
+    protected function getFieldSqlStatement($name, $config, $foreignKey = false) {
         switch ($config["type"]) {
             case "integer":
-                return $this->getIntegerSqlStatement($name, $config);
+                return $this->getIntegerSqlStatement($name, $config, $foreignKey);
                 break;
             case "text":
-                return $this->getTextSqlStatement($name, $config);
+                return $this->getTextSqlStatement($name, $config, $foreignKey);
                 break;
             default:
-                trigger_error("Unknown type <em>".$prop["type"].
-                              "</em> given for <em>".$name."</em> in Model ".
+                trigger_error("Unknown type specified ".
                               get_called_class(), \E_USER_ERROR);
                 exit;
         }
     }
 
-    protected function getIntegerSqlStatement($name, $prop) {
+    protected function getIntegerSqlStatement($name, $prop, $foreignKey = false) {
         if (isset($prop["maximumLength"]) && $prop["maximumLength"]) {
             $l = $prop["maximumLength"];
         } else {
@@ -89,13 +113,13 @@ abstract class MySqlInitialization extends \warnemuende\model\AbstractModel {
             $q .= " UNSIGNED";
         }
         $q .= " NOT NULL";
-        if (isset($prop["autoIncrement"]) && $prop["autoIncrement"]) {
+        if (!$foreignKey && isset($prop["autoIncrement"]) && $prop["autoIncrement"]) {
             $q .= " AUTO_INCREMENT";
         }
         return $q;
     }
 
-    protected function getTextSqlStatement($name, $prop) {
+    protected function getTextSqlStatement($name, $prop, $foreignKey = false) {
         if ($prop["maximumLength"] < 0) {
             $q = "`".$name."` LONGTEXT";
         } elseif ($prop["maximumLength"] <= 100) {
