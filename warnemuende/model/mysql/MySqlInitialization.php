@@ -37,6 +37,8 @@ abstract class MySqlInitialization extends \warnemuende\model\AbstractModel {
     }
 
     public function getCreateTableStatement() {
+        // Used below
+        $additionalTables = array();
         $q  = "CREATE TABLE `".$this->getTableName()."` (\n";
         foreach ($this->fields as $name => $prop) {
             if (!isset($prop["type"])) {
@@ -55,11 +57,13 @@ abstract class MySqlInitialization extends \warnemuende\model\AbstractModel {
                 foreach ($c->getPrimaryKey() as $key) {
                     $q .= $c->getFieldSqlStatement($c->getTableName()."_".$key, $c->getFieldOptions($key), true).",\n";
                 }
-                $q = substr($q, 0, -2);
+                //$q = substr($q, 0, -2);
+            } elseif ($prop["type"] == "associations") {
+                $additionalTables[] = $this->createAssociationTable($prop["class"]);
             } else {
                 $q .= $this->getFieldSqlStatement($name, $prop);
+                $q .= ",\n";
             }
-            $q .= ",\n";
         }
         if (count($this->getPrimaryKey()) > 0) {
             $q .= "PRIMARY KEY (`".implode("`, `", $this->getPrimaryKey())."`),\n";
@@ -72,7 +76,28 @@ abstract class MySqlInitialization extends \warnemuende\model\AbstractModel {
         $q = substr($q, 0, -2);
         $q .= "\n) CHARACTER SET 'utf8'";
         $q .= ";";
+        if (count($additionalTables) > 0) {
+            $q .= "\n\n";
+            $q .= implode("\n\n", $additionalTables);
+        }
         return $q;
+    }
+
+    function createAssociationTable($className) {
+        /* @var $c \warnemuende\model\AbstractModel */
+        $c = new $className;
+        $q  = "CREATE TABLE `".$this->getTableName()."_".$c->getTableName()."` (\n";
+        foreach ($this->getPrimaryKey() as $key) {
+            $q .= $this->getFieldSqlStatement($this->getTableName()."_".$key, $this->getFieldOptions($key), true).",\n";
+        }
+        foreach ($c->getPrimaryKey() as $key) {
+            $q .= $c->getFieldSqlStatement($c->getTableName()."_".$key, $c->getFieldOptions($key), true).",\n";
+        }
+        $q = substr($q, 0, -2);
+        $q .= "\n) CHARACTER SET 'utf8'";
+        $q .= ";";
+        return $q;
+
     }
 
     /**

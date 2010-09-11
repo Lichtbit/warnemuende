@@ -25,7 +25,7 @@ class Page extends Model {
         $this->addIntegerField("id", 22, true, array("myType" => "apfel"));
         $this->addTextField("slug", 30);
         $this->addTextField("content", -1);
-        $this->addAssociation("tag", "Tag");
+        $this->addAssociations("tag", "Tag");
 
         $this->setPrimaryKey("id");
         $this->addIndex("slug");
@@ -46,7 +46,7 @@ class Tag extends Model {
 $p = new Page();
 
 //$p->createTables();
-echo $p->getCreateTableStatement();
+echo $p->getCreateTableStatement()."\n\n";
 
 $t = new Tag();
 //$t->createTables();
