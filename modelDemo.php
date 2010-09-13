@@ -19,29 +19,7 @@ mysql_select_db("modeltester");
 mysql_query("SET NAMES 'utf8';");
 mysql_query("SET CHARACTER NAMES 'utf8';");
 
-class Page extends Model {
-
-    public function configure() {
-        $this->addIntegerField("id", 22, true, array("myType" => "apfel"));
-        $this->addTextField("slug", 30);
-        $this->addTextField("content", -1);
-        $this->addAssociations("tag", "Tag");
-
-        $this->setPrimaryKey("id");
-        $this->addIndex("slug");
-    }
-}
-
-class Tag extends Model {
-
-    public function configure() {
-        //$this->addIntegerField("id", 22, true);
-        $this->addTextField("tag", 30);
-        $this->addIntegerField("level", 10);
-        // FIXME If an integer has option auto increment true it must be a key
-        $this->setPrimaryKey("tag", "level");
-    }
-}
+require_once "pages/model.php";
 
 $p = new Page();
 
@@ -61,8 +39,8 @@ $t->setField("tag", "neuerTag");
 $t->save();
 echo mysql_error();
 
-//$p->dropTable();
-//$t->dropTable();
+$p->dropTable();
+$t->dropTable();
 die("\n--------------\nLäuft durch");
 
 ?>

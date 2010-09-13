@@ -86,7 +86,13 @@ abstract class MySqlInitialization extends \warnemuende\model\AbstractModel {
         return $q;
     }
 
-    function createAssociationTable($className) {
+    /**
+     * SQL code for creating a table for associations
+     *
+     * @param string $className Class name of target class
+     * @return string SQL code
+     */
+    protected function createAssociationTable($className) {
         /* @var $c \warnemuende\model\AbstractModel */
         $c = new $className;
         $q  = "CREATE TABLE `".$this->getTableName()."_".$c->getTableName()."` (\n";
@@ -94,7 +100,15 @@ abstract class MySqlInitialization extends \warnemuende\model\AbstractModel {
             $q .= $this->getFieldSqlStatement($this->getTableName()."_".$key, $this->getFieldOptions($key), true).",\n";
         }
         foreach ($c->getPrimaryKey() as $key) {
-            $q .= $c->getFieldSqlStatement($c->getTableName()."_".$key, $c->getFieldOptions($key), true).",\n";
+            $q .= $c->getFieldSqlStatement($c->getTableName().
+                  "_".$key, $c->getFieldOptions($key), true).",\n";
+        }
+        if (count($this->getPrimaryKey()) > 0) {
+            $q .= "PRIMARY KEY (`".$this->getTableName()
+                    ."_".implode("`, `".$this->getTableName()
+                    ."_", $this->getPrimaryKey())."`, `".$c->getTableName()
+                    ."_".implode("`, `".$c->getTableName()
+                    ."_", $c->getPrimaryKey())."`),\n";
         }
         $q = substr($q, 0, -2);
         $q .= "\n) CHARACTER SET 'utf8'";
@@ -164,18 +178,36 @@ abstract class MySqlInitialization extends \warnemuende\model\AbstractModel {
 
     public function dropTable() {
         if ($this->tableExists($this->getTableName())) {
-            mysql_query("DROP TABlE `".$this->getTableName()."`;");
+            foreach ($this->getUsedTableNames() as $table) {
+                mysql_query("DROP TABLE `".$table."`;");
+            }
         } else {
             trigger_error("Unable to find table ".$this->getTableName()." for dropping");
         }
     }
 
-    public function tableExists($tableName) {
-        $result = mysql_query("SHOW TABLES LIKE '".$tableName."';");
-        if (mysql_num_rows($result) > 0) {
-            return true;
+    private function getUsedTableNames() {
+        $ar = array($this->getTableName());
+        foreach ($this->getFields() as $field) {
+            if ($this->getFieldOption($field, "type") == "associations") {
+                $className = $this->getFieldOption($field, "class");
+                $c = new $className;
+                $tableName = $this->getTableName()."_".$c->getTableName();
+                $ar[] = $tableName;
+            }
         }
-        return false;
+        return $ar;
+    }
+
+    public function tableExists($tableName) {
+        $there = true;
+        foreach ($this->getUsedTableNames() as $tableName) {
+            $result = mysql_query("SHOW TABLES LIKE '".$tableName."';");
+            if (mysql_num_rows($result) < 1) {
+                $there = false;
+            }
+        }
+        return $there;
     }
 }
 ?>
