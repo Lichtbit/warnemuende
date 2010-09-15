@@ -23,21 +23,33 @@ require_once "pages/model.php";
 
 $p = new Page();
 
-$p->createTables();
-echo mysql_error();
-echo $p->getCreateTableStatement()."\n\n";
-
 $t = new Tag();
+
+try {
+$p->createTables();
 $t->createTables();
-echo $t->getCreateTableStatement();
+} catch (Exception $e) {};
+
+$t->setField("level", 2);
+$t->setField("tag", "mein tag");
+$t->save();
 
 $p->setField("slug", "home");
-$p->setField("content", "Hallo und herzlich willkomennßäüö");
+$p->setField("content", "Hallo und herzlich willkomennßäüö\n<br>\n--'''\\");
+$p->setField("tag", $t);
 $p->save();
+
+$n = Page::getById(array(1));
+//$n = Page::getByQuery("");
+echo $n->getField("content");
+$neu = $n->getField("tag");
+echo "\n\n";
+echo $neu->getField("level");
+
+$m = Tag::getById(array("mein tag", 2));
 
 $t->setField("tag", "neuerTag");
 $t->save();
-echo mysql_error();
 
 $p->dropTable();
 $t->dropTable();

@@ -26,8 +26,10 @@ abstract class MySqlInitialization extends \warnemuende\model\AbstractModel {
 
     public function createTables() {
         if ($this->tableExists($this->getTableName())) {
-            trigger_error("There is already a table named ".$this->getTableName()." - creation cancelled");
-            return;
+            throw new MySqlModelException(
+                "There is already a table named ".$this->getTableName().
+                " - cannot create it for Model ".get_called_class(),
+                101);
         }
         $qs = explode(";\n", $this->getCreateTableStatement());
         foreach ($qs as $query) {
@@ -45,20 +47,24 @@ abstract class MySqlInitialization extends \warnemuende\model\AbstractModel {
         $q  = "CREATE TABLE `".$this->getTableName()."` (\n";
         foreach ($this->fields as $name => $prop) {
             if (!isset($prop["type"])) {
-                trigger_error("No type given for <em>".
-                              $name."</em> in Model ".get_called_class(),
-                              \E_USER_ERROR);
-                exit;
+                throw new MySqlModelException(
+                    "No type given for field ".
+                    $name." in Model ".get_called_class(),
+                    111
+                );
             }
             if ($prop["type"] == "association") {
                 // A simple association can be a inserted in the same table
                 /* @var $c AbstractModel */
                 $c = new $prop["class"];
                 if (count($c->getPrimaryKey()) < 1) {
-                    trigger_error("Association targets need primary keys", \E_USER_ERROR);
+                    throw new MySqlModelException(
+                        "Association targets need primary keys", 112
+                    );
                 }
                 foreach ($c->getPrimaryKey() as $key) {
-                    $q .= $c->getFieldSqlStatement($c->getTableName()."_".$key, $c->getFieldOptions($key), true).",\n";
+                    $q .= $c->getFieldSqlStatement($c->getTableName()."_".
+                          $key, $c->getFieldOptions($key), true).",\n";
                 }
                 //$q = substr($q, 0, -2);
             } elseif ($prop["type"] == "associations") {
@@ -138,9 +144,10 @@ abstract class MySqlInitialization extends \warnemuende\model\AbstractModel {
                 return $this->getTextSqlStatement($name, $config, $foreignKey);
                 break;
             default:
-                trigger_error("Unknown type specified ".
-                              get_called_class(), \E_USER_ERROR);
-                exit;
+                throw new MySqlModelException(
+                    "Unknown type specified for field ".$name." in ".get_called_class(),
+                    113
+                );
         }
     }
 
@@ -182,7 +189,10 @@ abstract class MySqlInitialization extends \warnemuende\model\AbstractModel {
                 mysql_query("DROP TABLE `".$table."`;");
             }
         } else {
-            trigger_error("Unable to find table ".$this->getTableName()." for dropping");
+            throw new MySqlModelException(
+                "Unable to find table(s) (".$implode($this->getUsedTableNames(), ", ".
+                ") for dropping"),
+                121);
         }
     }
 

@@ -23,26 +23,25 @@ abstract class MySqlStorage extends MySqlInitialization {
     public function save() {
         $q = "REPLACE `".$this->getTableName()."` SET\n";
         foreach ($this->storage as $name => $value) {
-            if (is_string($value)) {
+            if ($this->getFieldOption($name, "type") == "association") {
+                // TODO Is it okay to simply save here?
+                if ($this->getField($name) == null OR !is_object($this->getField($name))) {
+                    echo "abbtuch";
+                    continue;
+                }
+                /* @var $o MySqlStorage */
+                $o = $this->getField($name);
+                $o->save();
+                foreach ($o->getPrimaryKey() as $key) {
+                    $q .= $o->getSqlValueAssignment($key, $o->getField($key), true).",\n";
+                }
+            } elseif (is_string($value)) {
                 $q .= "`".$name."` = ";
                 $q .= "'".mysql_real_escape_string(htmlspecialchars($value))."'";
                 $q .= ",\n";
-            } /*elseif(static::getAttribute($name, "type") == "association") {
-                if (static::getAttribute($name, "cardinality") == "1") {
-                    if ($this->$name->getId() == null) {
-                        trigger_error("Unable to save reference - related ".get_class($this->$name)." object has no id");
-                        continue;
-                    }
-                    $q .= "`".$name."` = ";
-                    // TODO Foreign key can be much more complicated
-                    $q .= $this->$name->getId();
-                    $q .= ",\n";
-                } else {
-                    trigger_error("Not implemented yet", \E_USER_ERROR);
-                }
-            }*/ else {
+            } else {
                 $q .= "`".$name."` = ";
-                $q .= $this->$name;
+                $q .= $value;
                 $q .= ",\n";
             }
         }
@@ -67,6 +66,20 @@ abstract class MySqlStorage extends MySqlInitialization {
      */
     public function setTableName($name) {
         $this->tableName = $name;
+    }
+
+    protected function getSqlValueAssignment($field, $value, $asForeignKey = false) {
+        $q = "`".$this->getTableName()."`.`".$field."` = ";
+        if ($asForeignKey) {
+            $q = "`".$this->getTableName()."_".$field."` = ";
+        }
+        if ($this->getFieldOption($field, "type") == "text") {
+            $q .= "'".$value."'";
+        } else {
+            $q .= $value;
+        }
+        
+        return $q;
     }
     
 }
