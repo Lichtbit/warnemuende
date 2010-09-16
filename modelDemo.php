@@ -42,7 +42,7 @@ $a->setField("age", 25);
 $p->setField("slug", "home");
 $p->setField("content", "Hallo und herzlich willkomennßäüö\n<br>\n--'''\\");
 $p->setField("author", $a);
-$p->setField("tag", $t);
+$p->setField("tag", array($t));
 $p->save();
 
 $n = Page::getById(array(1));
@@ -51,6 +51,11 @@ echo $n->getField("content");
 $neu = $n->getField("author");
 echo "\n\n";
 echo $neu->getField("firstname")." ".$neu->getField("name").", ".$neu->getField("age");
+
+$tags = $n->getField("tag");
+echo "\n\n";
+echo $tags[0]->getField("tag").", level ".$tags[0]->getField("level");
+echo "\n\n";
 
 $m = Tag::getById(array("mein tag", 2));
 

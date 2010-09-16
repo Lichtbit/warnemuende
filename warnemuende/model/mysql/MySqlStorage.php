@@ -42,10 +42,17 @@ abstract class MySqlStorage extends MySqlInitialization {
                     $q .= $o->getSqlValueAssignment($key, $o->getField($key), true).",\n";
                 }
             } elseif ($this->getFieldOption($name, "type") == "associations") {
-                if ($this->getField($name) == null OR !is_object($this->getField($name))) {
+                if ($this->getField($name) == null OR (is_array($this->getField($name))
+                    AND count($this->getField($name)) == 0)) {
                     continue;
+                } elseif (!is_array($this->getField($name))) {
+                    throw new MySqlModelException(
+                        "Field for multiple associations is not an array",
+                        202);
                 }
-                $associations[] = array($this->getField($name), $this->getFieldOption($name, "class"));
+                foreach ($this->getField($name) as $assField) {
+                    $associations[] = array($assField, $this->getFieldOption($name, "class"));
+                }
             } elseif (is_string($value)) {
                 $q .= "`".$name."` = ";
                 $q .= "'".mysql_real_escape_string(htmlspecialchars($value))."'";

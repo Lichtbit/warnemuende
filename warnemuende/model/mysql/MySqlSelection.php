@@ -100,6 +100,26 @@ abstract class MySqlSelection extends MySqlStorage {
                     }
                     $m->setField($field, $targetName::getById($id));
                 } elseif($c->getFieldOption($field, "type") == "associations") {
+                    $assClassName = $c->getFieldOption($field, "class");
+                    /* @var $class MySqlSelection */
+                    $class = new $assClassName;
+                    $assObjects = array();
+                    $q2  = "SELECT * \n";
+                    $q2 .= "FROM `".$c->getTableName()."_".$class->getTableName()."` \n";
+                    $q2 .= "WHERE ";
+                    foreach ($c->getPrimaryKey() as $pk) {
+                        $q2 .= $c->getSqlValueAssignment($pk, $row[$pk], true)." && ";
+                    }
+                    $q2 = substr($q2, 0, -4).";";
+                    $newResult = mysql_query($q2);
+                    while ($row2 = mysql_fetch_assoc($newResult)) {
+                        $assId = array();
+                        foreach ($class->getPrimaryKey() as $assKey) {
+                            $assId[] = $row2[$class->getTableName()."_".$assKey];
+                        }
+                        $assObjects[] = $assClassName::getById($assId);
+                    }
+                    $m->setField($field, $assObjects);
                 } else {
                     $m->setField($field, $row[$field]);
                 }
