@@ -21,12 +21,18 @@ abstract class MySqlStorage extends MySqlInitialization {
     }
 
     public function save() {
+        if (!isset($this->storage) || count($this->storage) == 0) {
+            throw new MySqlModelException(
+                "Unable to save ".get_called_class()." object (no data given)",
+                201
+            );
+        }
+        $associations = array();
         $q = "REPLACE `".$this->getTableName()."` SET\n";
         foreach ($this->storage as $name => $value) {
             if ($this->getFieldOption($name, "type") == "association") {
                 // TODO Is it okay to simply save here?
                 if ($this->getField($name) == null OR !is_object($this->getField($name))) {
-                    echo "abbtuch";
                     continue;
                 }
                 /* @var $o MySqlStorage */
@@ -35,6 +41,11 @@ abstract class MySqlStorage extends MySqlInitialization {
                 foreach ($o->getPrimaryKey() as $key) {
                     $q .= $o->getSqlValueAssignment($key, $o->getField($key), true).",\n";
                 }
+            } elseif ($this->getFieldOption($name, "type") == "associations") {
+                if ($this->getField($name) == null OR !is_object($this->getField($name))) {
+                    continue;
+                }
+                $associations[] = array($this->getField($name), $this->getFieldOption($name, "class"));
             } elseif (is_string($value)) {
                 $q .= "`".$name."` = ";
                 $q .= "'".mysql_real_escape_string(htmlspecialchars($value))."'";
@@ -44,6 +55,27 @@ abstract class MySqlStorage extends MySqlInitialization {
                 $q .= $value;
                 $q .= ",\n";
             }
+        }
+        $q = substr($q, 0, -2)."\n;";
+        mysql_query($q);
+        // Set auto increment fields to current database value (for inserts)
+        foreach ($this->getPrimaryKey() as $pk) {
+            if ($this->getFieldOption($pk, "autoIncrement") == true) {
+                $this->setField($pk, mysql_insert_id());
+            }
+        }
+        foreach ($associations as $a) {
+            $this->saveAssociationObject($a[0], $a[1]);
+        }
+    }
+
+    protected function saveAssociationObject($object, $className) {
+        $q = "REPLACE `".$this->getTableName()."_".$object->getTableName()."` SET \n";
+        foreach ($object->getPrimaryKey() as $key) {
+            $q .= $object->getSqlValueAssignment($key, $object->getField($key), true).",\n";
+        }
+        foreach ($this->getPrimaryKey() as $key) {
+            $q .= $this->getSqlValueAssignment($key, $this->getField($key), true).",\n";
         }
         $q = substr($q, 0, -2)."\n;";
         mysql_query($q);
